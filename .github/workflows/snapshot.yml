@@ -1,17 +1,25 @@
 name: Publish snapshot to Maven Central
 
-# Every commit that lands on the default branch publishes a snapshot of
+# Every push to the default branch requests a snapshot of
 # org.jmonkeyengine:jme3-testdata to Sonatype, using the same date based
 # versioning as the releases (scripts/next-version.sh) plus the -SNAPSHOT
 # qualifier: <YYYY-MM-DD>-SNAPSHOT.
 #
 # Contrary to the releases, no tag and no GitHub release are created, and the
-# version is not numbered: a Maven snapshot can be republished, so every commit
-# of the day simply updates the <YYYY-MM-DD>-SNAPSHOT version.
+# version is not numbered: a Maven snapshot can be republished, so commits of
+# the day update the <YYYY-MM-DD>-SNAPSHOT version. Superseded commits are skipped.
 
 on:
   push:
     branches: [master]
+
+# Snapshot uploads share Maven metadata, so never interrupt or overlap them.
+concurrency:
+  group: publish-testdata-snapshot
+  cancel-in-progress: false
+
+permissions:
+  contents: read
 
 jobs:
   snapshot:
@@ -23,7 +31,9 @@ jobs:
 
       - name: Compute the snapshot version
         id: version
-        run: echo "version=$(bash scripts/next-version.sh --snapshot)" >> "$GITHUB_OUTPUT"
+        run: |
+          version="$(bash scripts/next-version.sh --snapshot)"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
 
       - name: Setup the java environment
         uses: actions/setup-java@v4
@@ -38,6 +48,14 @@ jobs:
           ORG_GRADLE_PROJECT_signingKey: ${{ secrets.SIGNING_KEY }}
           ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.SIGNING_PASSWORD }}
         run: |
+          # Queued runs and manual reruns can target a superseded commit.
+          master_ref="$(git ls-remote --exit-code origin refs/heads/master)"
+          master_sha="${master_ref%%[[:space:]]*}"
+          if [ "${GITHUB_SHA}" != "${master_sha}" ]; then
+            echo "Skipping snapshot for ${GITHUB_SHA}; master is now ${master_sha}."
+            exit 0
+          fi
+
           if [ "${ORG_GRADLE_PROJECT_centralUsername}" = "" ] || \
              [ "${ORG_GRADLE_PROJECT_centralPassword}" = "" ] || \
              [ "${ORG_GRADLE_PROJECT_signingKey}" = "" ] || \
