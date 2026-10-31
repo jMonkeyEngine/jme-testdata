@@ -21,23 +21,6 @@ resets the next day:
 | 3rd | `2026-09-19-3` |
 | 1st of the next day | `2026-09-20` |
 
-Publishing credentials are checked before creating a tag or GitHub release. If a
-release run fails, rerun it from the Actions tab: once its tag has been pushed,
-every attempt reuses the same version and GitHub release, even on a later day.
-An upload that a previous attempt recorded as successful is skipped. A new
-manual dispatch starts a separate release and allocates a new version.
-
-Every push to `master` triggers the **Publish snapshot to Maven Central** workflow
-(`.github/workflows/snapshot.yml`), publishing
-`org.jmonkeyengine:jme3-testdata:<YYYY-MM-DD>-SNAPSHOT`. Snapshot uploads are
-serialized without cancelling an upload in progress. Runs whose commit is no
-longer the head of `master` are skipped before uploading, so a queued run or a
-rerun of an older commit cannot replace a newer snapshot.
-
-The version of the day and the counter are computed by
-[`scripts/next-version.sh`](scripts/next-version.sh), covered by
-[`scripts/next-version-test.sh`](scripts/next-version-test.sh).
-
 ## Licenses
 
 The assets themselves are third-party test data under mixed licenses.
