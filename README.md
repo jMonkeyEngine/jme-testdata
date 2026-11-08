@@ -44,3 +44,6 @@ The assets themselves are third-party test data under mixed licenses.
 | Ninja, Oto, Elephant, Buggy, Boat, Tank, HoverTank, SpaceCraft, Tree and other test models | author unknown | unclear |
 | Beach, DotScene, ManyLights scenes | author unknown | unclear |
 | Sounds, explosion/smoke sprites, interface graphics, other test textures | author unknown | unclear |
+| [Texture/Cursors/monkey](http://www.rw-designer.com/cursor-set/monkey) | Pointer Adic | Public Domain |
+| [Texture/Cursors/nyancat](http://www.rw-designer.com/icon-set/nyan-cat) | Sirea | CC by |
+| [Texture/Cursors/meme](http://www.rw-designer.com/cursor-set/memes-faces-v64) | Virum64 | Public Domain |
